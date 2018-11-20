@@ -3,12 +3,13 @@
 :mod:`sar.viz` is a module containing classes for visualizing sar logs.
 '''
 
+from __future__ import division
 from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
-
+#fix x-server missed
+plt.switch_backend('agg')
 import numpy as np
-
 
 class Visualization(object):
     PDF_OUTPUT = 0
@@ -64,6 +65,7 @@ class Visualization(object):
         self.page_ins_per_sec = []
         self.page_outs_per_sec = []
         self.pct_mem_used = []
+        self.pct_mem_commit = []
         self.mem_used_mb = []
         self.mem_cached_mb = []
         self.mem_buffer_mb = []
@@ -102,15 +104,16 @@ class Visualization(object):
         for t in Visualization.SAR_TYPES:
             if t in self.sar_data:
                 time_points = self.sar_data[t].keys()
-                time_points.sort()
-                self.time_points = time_points
+                self.time_points = sorted(time_points)
+#                time_points.sort()
+                time_points = self.time_points
                 break
 
         tp_count = len(time_points)
-        xtick_label_stepsize = tp_count / 15
+        xtick_label_stepsize = float(tp_count) / 15.0
         self.x_data = range(tp_count)
-        self.xticks = np.arange(0, tp_count, xtick_label_stepsize)
-        self.xtick_labels = [time_points[i] for i in self.xticks]
+        self.xticks = np.arange(0, tp_count, float(xtick_label_stepsize))
+        self.xtick_labels = [time_points[int(i)] for i in self.xticks]
 
         if self.enable_cpu:
             self.cpu_usage_sys = [self.sar_data['cpu'][tp]['all']['sys']
@@ -119,7 +122,9 @@ class Visualization(object):
                                   for tp in self.time_points]
 
         if self.enable_mem:
-            self.pct_mem_used = [self.sar_data['mem'][tp]['memusedpercent'] / 1024
+            # self.pct_mem_used = [self.sar_data['mem'][tp]['memusedpercent'] / 100
+            #                     for tp in self.time_points]
+            self.pct_mem_commit = [self.sar_data['mem'][tp]['memcommitpercent'] / 100
                                  for tp in self.time_points]
             self.mem_used_mb = [(self.sar_data['mem'][tp]['memused'] - (
                                  self.sar_data['mem'][tp]['memcache'] + self.sar_data['mem']
@@ -170,8 +175,8 @@ class Visualization(object):
             plt.subplot(self.num_plots, 1, plt_idx)
             plt.xticks(self.xticks, self.xtick_labels,
                        rotation=Visualization.PLT_XTICK_LABEL_ROTATION)
-            plt.plot(self.x_data, self.cpu_usage_usr, label='usr')
-            plt.plot(self.x_data, self.cpu_usage_sys, label='sys')
+            plt.plot(self.x_data, self.cpu_usage_usr, label='cpu usr')
+            plt.plot(self.x_data, self.cpu_usage_sys, label='cpu sys')
             plt.xlabel('time')
             plt.ylabel('% usage')
             plt.title('CPU Usage')
@@ -184,10 +189,11 @@ class Visualization(object):
             plt.subplot(self.num_plots, 1, plt_idx)
             plt.xticks(self.xticks, self.xtick_labels,
                        rotation=Visualization.PLT_XTICK_LABEL_ROTATION)
-            plt.plot(self.x_data, self.pct_mem_used, label='% mem used')
+            # plt.plot(self.x_data, self.pct_mem_used, label='% mem used')
+            plt.plot(self.x_data, self.pct_mem_commit, label='% mem commit')
             plt.xlabel('time')
-            plt.ylabel('% mem used')
-            plt.title('Percentage of Memory Used')
+            plt.ylabel('% mem usage')
+            plt.title('Percentage of Memory usage')
             lg = plt.legend(frameon=False)
             lg_txts = lg.get_texts()
             plt.setp(lg_txts, fontsize=10)

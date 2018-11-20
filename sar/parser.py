@@ -16,7 +16,7 @@ import os
 import re
 import traceback
 import logging
-from types import ListType
+#from types import ListType
 import platform
 
 
@@ -148,6 +148,7 @@ class Parser(object):
             if (data == ''):
                 try:
                     fhandle = os.open(self.__filename, os.O_RDONLY)
+                    #fhandle = open(self.__filename,'rb')
                 except OSError:
                     print(("Couldn't open file %s" % (self.__filename)))
                     fhandle = None
@@ -188,7 +189,8 @@ class Parser(object):
 
                 except (TypeError, IndexError):
                     if (data == ''):
-                        os.close(fhandle)
+                         os.close(fhandle)
+#                         close(fhandle)
                     traceback.print_exc()
                     #sys.exit(-1)
                     return False
@@ -196,7 +198,7 @@ class Parser(object):
                 # Here we'll store chunks of SAR file, unparsed
                 searchunks = []
                 oldchunkpos = 0
-                dlpos = sarmap.find("\n\n", 0)
+                dlpos = sarmap.find(b'\n\n', 0)
                 size = 0
 
                 if (data == ''):
@@ -226,7 +228,7 @@ class Parser(object):
                     except ValueError:
                         print(("Out of bounds (%s)!\n" % (sarmap.tell())))
                     # Now we repeat find.
-                    dlpos = sarmap.find("\n\n")
+                    dlpos = sarmap.find(b"\n\n")
 
                 # If it wasn't the end of file, we want last piece of it
                 if (oldchunkpos < size):
@@ -236,7 +238,8 @@ class Parser(object):
                 sarmap.close()
 
             if (fhandle != -1):
-                os.close(fhandle)
+                 os.close(fhandle)
+#                close(fhandle)
 
             if (searchunks):
                 return searchunks
@@ -260,7 +263,7 @@ class Parser(object):
         net_usage = ''
 
         # If sar_parts is a list
-        if (type(sar_parts) is ListType):
+        if isinstance(sar_parts,list):
             # We will find CPU section by looking for typical line in CPU
             # section of SAR output
             cpu_pattern = re.compile(PATTERN_CPU)
@@ -277,8 +280,9 @@ class Parser(object):
             ''' IF SYSTEM WAS REBOOTED DURING THE DAY                '''
             ''' !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! '''
 
-            for part in sar_parts:
-                logging.debug(part)
+            for part_ in sar_parts:
+                part=bytes.decode(part_)
+ #               logging.debug(part)
                 # Try to match CPU usage SAR file sections
                 if (cpu_pattern.search(part)):
                     if (cpu_usage == ''):
@@ -534,7 +538,8 @@ class Parser(object):
                         fields = self.__net_fields
                         pairs = FIELD_PAIRS_NET
 
-                    for sectionname in pairs.iterkeys():
+#fixed iterkeys
+                    for sectionname in pairs.keys():
 
                         value = elems[fields[pairs[sectionname]]]
 
