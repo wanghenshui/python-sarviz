@@ -19,6 +19,10 @@ sar_viz = viz.Visualization(insar.get_sar_info(), paging=True, network=True, dis
 sar_viz.save('sample.pdf')
 ```
 
+## NOTICE
+works on python3, python2 use old version
+check out branch ``python3-cross-patch``
+
 # Example Visualization
 
 ![sarviz](https://raw.githubusercontent.com/milinda/python-sarviz/master/sample.png)
