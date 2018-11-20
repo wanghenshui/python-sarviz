@@ -20,8 +20,10 @@ sar_viz.save('sample.pdf')
 ```
 
 ## NOTICE
-works on python3, python2 use old version
-check out branch ``python3-cross-patch``
+### works on python3, check out branch ``python3-cross-patch``
+python2 use old version
+
+
 
 # Example Visualization
 
